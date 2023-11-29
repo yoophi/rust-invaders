@@ -68,6 +68,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         // update
         player.update(delta);
         invaders.update(delta);
+        if player.detect_hits(&mut invaders) {
+            // play sound
+        }
 
         // draw & render
         // player.draw(&mut curr_frame);
@@ -77,9 +80,17 @@ fn main() -> Result<(), Box<dyn Error>> {
             drawable.draw(&mut curr_frame);
         }
 
-
         let _ = render_tx.send(curr_frame);
         thread::sleep(Duration::from_millis(1));
+
+        // win or lose?
+        if invaders.all_killed() {
+            break 'gameloop;
+        }
+
+        if invaders.reached_bottom() {
+            break 'gameloop;
+        }
     }
 
     // cleanup

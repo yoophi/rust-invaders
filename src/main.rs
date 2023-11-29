@@ -7,7 +7,8 @@ use crossterm::cursor::{Hide, Show};
 use crossterm::event::{Event, KeyCode};
 use crossterm::terminal::{EnterAlternateScreen, LeaveAlternateScreen};
 use invaders::{frame, render};
-use invaders::frame::new_frame;
+use invaders::frame::{Drawable, new_frame};
+use invaders::player::Player;
 
 fn main() -> Result<(), Box<dyn Error>> {
     println!("Hello, world!");
@@ -37,13 +38,16 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 
     // game loop
+    let mut player = Player::new();
     'gameloop: loop {
-        let curr_frame = new_frame();
+        let mut curr_frame = new_frame();
 
         // input
         while event::poll(Duration::default())? {
             if let Event::Key(key_event) = event::read()? {
                 match key_event.code {
+                    KeyCode::Left => player.move_left(),
+                    KeyCode::Right => player.move_right(),
                     KeyCode::Esc | KeyCode::Char('q') => {
                         break 'gameloop;
                     }
@@ -53,6 +57,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
 
         // draw & render
+        player.draw(&mut curr_frame);
         let _ = render_tx.send(curr_frame);
         thread::sleep(Duration::from_millis(1));
     }
